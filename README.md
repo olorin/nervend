@@ -1,7 +1,7 @@
 nervend
 =======
 
-nervend is a Linux decryption daemon for the Emotive EPOC, 
+nervend is a Linux decryption daemon for the Emotiv EPOC, 
 based on Kyle Machulis' emokit (https://github.com/qdot/emokit). 
 
 requirements
@@ -31,4 +31,4 @@ is inserted; put something like this into /etc/udev/rules.d/epoc.rules:
 
    ATTR{manufacturer}=="Emotiv Systems Pty Ltd", ATTRS{product}=="Receiver Dongle L01", NAME="eeg/epoc%2", SYMLINK+="epoc%n"
 
-   SUBSYSTEM=="hidraw", ATTRS{idVendor}=="21a1", ATTRS{idProduct}=="0001", NAME="eeg/encrypted%n", SYMLINK+="eeg/encrypted", MODE="0444", RUN +="/path/to/nervend <device_type>"
+   SUBSYSTEM=="hidraw", ATTRS{idVendor}=="21a1", ATTRS{idProduct}=="0001", NAME="eeg/encrypted%n", SYMLINK+="eeg/encrypted", MODE="0444", RUN +="/path/to/nervend device_type"
