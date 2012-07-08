@@ -10,6 +10,9 @@ requirements
 The emokit C library (https://github.com/qdot/emokit) needs to be 
 installed.
 
+(Currently nervend only works with my fork of emokit at 
+https://github.com/fractalcat/emokit, but this should be fixed soon.)
+
 how to use it
 =============
 
