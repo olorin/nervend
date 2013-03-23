@@ -8,7 +8,7 @@ nervend.o :
 	gcc -c $(SRCDIR)/nervend.c -o $(BUILDDIR)/nervend.o
 
 nervend : nervend.o
-	gcc -o nervend $(BUILDDIR)/nervend.o -lemokit -lusb-1.0 -lmcrypt -lpthread
+	gcc -o nervend $(BUILDDIR)/nervend.o -lemokit -lusb-1.0 -lhidapi-hidraw -lmcrypt -lpthread -ludev
 
 clean:
 	rm -f build/*.o rm nervend

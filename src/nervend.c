@@ -17,6 +17,8 @@
 
 sigset_t mask;
 
+typedef struct emokit_device emokit_device;
+
 void fatal_err(const char *msg) {
   syslog(LOG_INFO, msg);
   exit(1);
@@ -122,10 +124,10 @@ void daemonize() {
 void dbg_stream(emokit_device *eeg) {
   int i;
   for (;;) {
-    if (emokit_read_data(eeg)) {
+    if (emokit_read_data(eeg) > 0) {
       emokit_get_next_frame(eeg);
       for (i=0; i < 32; ++i) {
-	printf("%d ", eeg->raw_unenc_frame[i]);
+	//printf("%d ", eeg->raw_frame[i]);
       }
       putchar('\n');
       fflush(stdout);
@@ -141,16 +143,13 @@ void decrypt_loop(emokit_device *eeg) {
     fatal_err("cannot open FIFO for writing.");
   }
   for (;;) {
-    if (emokit_read_data(eeg)) {
+    if (emokit_read_data(eeg) > 0) {
       emokit_get_next_frame(eeg);
-      fwrite(eeg->raw_unenc_frame, 1, EMOKIT_PKT_SIZE, nervend_fifo);
+      unsigned char raw_frame[32];
+      emokit_get_raw_frame(eeg, raw_frame);
+      fwrite(raw_frame, 1, EMOKIT_PKT_SIZE, nervend_fifo);
     }
   }
-}
-
-void exit_usage(char *exec_name) {
-  printf("Usage: %s consumer|developer\n", exec_name);
-  exit(1);
 }
 
 int main(int argc, char **argv) {
@@ -159,15 +158,6 @@ int main(int argc, char **argv) {
   pthread_t tid;
   struct sigaction sa;
   emokit_device *eeg;
-  if (argc < 2) {
-    exit_usage(argv[0]);
-  }
-  if (strcmp(argv[1], "consumer") == 0) 
-    dev_type = EMOKIT_CONSUMER;
-  else if (strcmp(argv[1], "developer") == 0)
-    dev_type = EMOKIT_DEVELOPER;
-  else 
-    exit_usage(argv[0]);
   if (!DEBUG) {
     daemonize();
     if (daemon_running()) {
@@ -175,11 +165,12 @@ int main(int argc, char **argv) {
       exit(1);
     }
   }
-  eeg = emokit_create(dev_type);
+  eeg = emokit_create();
   if (emokit_open(eeg, EMOKIT_VID, EMOKIT_PID, 0) != 0) {
     fatal_err("cannot access device. Are you root?");
     return 1;
   }
+
   if ((access(FIFO_PATH, W_OK) < 0) && mkfifo(FIFO_PATH, 0666) != 0) {
     fatal_err("cannot create FIFO.");
   }
@@ -192,6 +183,8 @@ int main(int argc, char **argv) {
     fatal_err("SIG_BLOCK error.");
   if (pthread_create(&tid, NULL, thr_signal_handler, 0) != 0) 
     fatal_err("cannot create thread.");
+  if (DEBUG)
+    printf("Entering decrypt loop...\n");
   decrypt_loop(eeg);
   return 0;
 }
