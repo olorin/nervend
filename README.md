@@ -1,3 +1,9 @@
+ACHTUNG
+=======
+
+Don't use this, use emokitd from http://github.com/openyou/emokit 
+instead.
+
 nervend
 =======
 
